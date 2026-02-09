@@ -59,7 +59,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 async function handleSearch(query) {
   const q = query.toLowerCase().trim();
-  if (!q) return { tabs: [], bookmarks: [], actions: [] };
+  if (!q) return { tabs: [], bookmarks: [], bookmarksSecondary: [], actions: [] };
 
   // Get all tabs in current window
   const tabs = await chrome.tabs.query({ currentWindow: true });
@@ -71,9 +71,9 @@ async function handleSearch(query) {
   // Filter and score tabs
   const matchedTabs = tabs
     .filter(tab => {
-      const host = getHost(tab.url);
+      const url = (tab.url || '').toLowerCase();
       const title = (tab.title || '').toLowerCase();
-      return host.includes(q) || title.includes(q);
+      return url.includes(q) || title.includes(q);
     })
     .map(tab => ({
       type: 'tab',
@@ -84,21 +84,33 @@ async function handleSearch(query) {
       favIconUrl: tab.favIconUrl || null
     }));
 
-  // Filter bookmarks
-  const matchedBookmarks = bookmarks
-    .filter(bm => {
-      const host = getHost(bm.url);
-      const title = (bm.title || '').toLowerCase();
-      return host.includes(q) || title.includes(q);
-    })
-    .map(bm => ({
-      type: 'bookmark',
-      id: bm.id,
-      title: bm.title || 'Untitled',
-      url: bm.url,
-      host: getHost(bm.url),
-      favIconUrl: null // Will use Google's favicon service
-    }));
+  // Filter bookmarks - separate URL matches from title-only matches
+  const urlMatchBookmarks = [];
+  const titleOnlyMatchBookmarks = [];
+  
+  for (const bm of bookmarks) {
+    const url = (bm.url || '').toLowerCase();
+    const title = (bm.title || '').toLowerCase();
+    const urlMatches = url.includes(q);
+    const titleMatches = title.includes(q);
+    
+    if (urlMatches || titleMatches) {
+      const item = {
+        type: 'bookmark',
+        id: bm.id,
+        title: bm.title || 'Untitled',
+        url: bm.url,
+        host: getHost(bm.url),
+        favIconUrl: getFaviconUrl(bm.url)
+      };
+      
+      if (urlMatches) {
+        urlMatchBookmarks.push(item);
+      } else {
+        titleOnlyMatchBookmarks.push(item);
+      }
+    }
+  }
 
   // Filter actions
   const matchedActions = ACTIONS.filter(action => {
@@ -108,15 +120,28 @@ async function handleSearch(query) {
     return titleMatch || descMatch || keywordMatch;
   });
 
-  // Dedupe: if a bookmark's host has an open tab, mark it
+  // Dedupe: if a bookmark's host has an open tab, filter it from primary bookmarks
   const openHosts = new Set(matchedTabs.map(t => t.host));
-  const dedupedBookmarks = matchedBookmarks.filter(bm => !openHosts.has(bm.host));
+  const dedupedUrlBookmarks = urlMatchBookmarks.filter(bm => !openHosts.has(bm.host));
+  const dedupedTitleBookmarks = titleOnlyMatchBookmarks.filter(bm => !openHosts.has(bm.host));
 
+  // Order: URL-matching bookmarks first, then tabs, then title-only bookmarks
   return {
+    bookmarksPrimary: dedupedUrlBookmarks.slice(0, 10),
     tabs: matchedTabs.slice(0, 10),
-    bookmarks: dedupedBookmarks.slice(0, 10),
+    bookmarksSecondary: dedupedTitleBookmarks.slice(0, 10),
     actions: matchedActions.slice(0, 5)
   };
+}
+
+function getFaviconUrl(url) {
+  try {
+    const u = new URL(url);
+    // Use Chrome's internal favicon API
+    return `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=32`;
+  } catch {
+    return null;
+  }
 }
 
 async function handleOpenResult(result) {

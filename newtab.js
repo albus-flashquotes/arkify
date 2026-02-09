@@ -49,7 +49,13 @@ async function onSearch() {
   }
 
   const response = await chrome.runtime.sendMessage({ action: 'search', query });
-  currentResults = [...response.actions, ...response.tabs, ...response.bookmarks];
+  currentResults = [
+    ...response.actions,
+    ...(response.bookmarksPrimary || []),
+    ...response.tabs,
+    ...(response.bookmarksSecondary || []),
+    ...(response.bookmarks || [])
+  ];
   selectedIndex = 0;
   renderResults();
 }
@@ -69,9 +75,7 @@ function renderResults() {
       badge = '<span class="fm-badge fm-badge-action">ACTION</span>';
       subtitle = r.description;
     } else {
-      const faviconUrl = r.type === 'tab' && r.favIconUrl 
-        ? r.favIconUrl 
-        : `https://www.google.com/s2/favicons?domain=${r.host}&sz=32`;
+      const faviconUrl = r.favIconUrl || `https://www.google.com/s2/favicons?domain=${r.host}&sz=32`;
       favicon = `<img class="fm-favicon" src="${faviconUrl}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23666%22><rect width=%2224%22 height=%2224%22 rx=%224%22/></svg>'">`;
       badge = r.type === 'tab' 
         ? '<span class="fm-badge fm-badge-tab">TAB</span>'
