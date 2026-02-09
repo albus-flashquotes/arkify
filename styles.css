@@ -67,6 +67,36 @@
   color: #666;
 }
 
+.fm-clear-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.fm-clear-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.fm-clear-btn.fm-visible {
+  display: flex;
+}
+
+.fm-clear-btn svg {
+  width: 14px;
+  height: 14px;
+  color: #888;
+}
+
 .fm-results {
   max-height: 400px;
   overflow-y: auto;

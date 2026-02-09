@@ -27,6 +27,11 @@
             <path d="M21 21l-4.35-4.35"></path>
           </svg>
           <input type="text" class="fm-input" placeholder="Search tabs and bookmarks..." autocomplete="off" spellcheck="false">
+          <button class="fm-clear-btn" type="button" aria-label="Clear search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
         <div class="fm-results"></div>
         <div class="fm-footer">
@@ -42,12 +47,33 @@
     input = palette.querySelector('.fm-input');
     resultsList = palette.querySelector('.fm-results');
     const backdrop = palette.querySelector('.fm-backdrop');
+    const clearBtn = palette.querySelector('.fm-clear-btn');
 
-    input.addEventListener('input', debounce(onSearch, 50));
+    input.addEventListener('input', () => {
+      updateClearButton();
+      debounce(onSearch, 50)();
+    });
     input.addEventListener('keydown', onKeyDown);
     backdrop.addEventListener('click', hidePalette);
+    clearBtn.addEventListener('click', clearSearch);
 
     return palette;
+  }
+
+  function updateClearButton() {
+    const clearBtn = palette?.querySelector('.fm-clear-btn');
+    if (clearBtn) {
+      clearBtn.classList.toggle('fm-visible', input.value.length > 0);
+    }
+  }
+
+  function clearSearch() {
+    input.value = '';
+    resultsList.innerHTML = '';
+    currentResults = [];
+    selectedIndex = 0;
+    updateClearButton();
+    input.focus();
   }
 
   function showPalette() {
@@ -135,13 +161,8 @@
   function onKeyDown(e) {
     if (e.key === 'Escape') {
       if (input.value) {
-        // Clear search if there's text
-        input.value = '';
-        resultsList.innerHTML = '';
-        currentResults = [];
-        selectedIndex = 0;
+        clearSearch();
       } else {
-        // Close palette if search is empty
         hidePalette();
       }
       e.preventDefault();
