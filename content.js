@@ -58,6 +58,17 @@
     backdrop.addEventListener('click', hidePalette);
     clearBtn.addEventListener('click', clearSearch);
 
+    // Block all keyboard events from reaching the page when palette is open
+    palette.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+    }, true);
+    palette.addEventListener('keyup', (e) => {
+      e.stopPropagation();
+    }, true);
+    palette.addEventListener('keypress', (e) => {
+      e.stopPropagation();
+    }, true);
+
     return palette;
   }
 
