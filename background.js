@@ -50,6 +50,66 @@ const ACTIONS = [
     icon: '⚙️',
     keywords: ['settings', 'config', 'configure', 'preferences', 'options'],
     hasSettings: false
+  },
+  {
+    id: 'open-bookmarks',
+    type: 'action',
+    title: 'Open Bookmarks',
+    description: 'Open Chrome bookmarks manager',
+    icon: '📚',
+    keywords: ['open', 'bookmarks', 'bookmark manager', 'chrome'],
+    hasSettings: false,
+    chromeUrl: 'chrome://bookmarks'
+  },
+  {
+    id: 'open-extensions',
+    type: 'action',
+    title: 'Open Extensions',
+    description: 'Open Chrome extensions page',
+    icon: '🧩',
+    keywords: ['open', 'extensions', 'plugins', 'addons', 'chrome'],
+    hasSettings: false,
+    chromeUrl: 'chrome://extensions'
+  },
+  {
+    id: 'open-history',
+    type: 'action',
+    title: 'Open History',
+    description: 'Open Chrome browsing history',
+    icon: '🕐',
+    keywords: ['open', 'history', 'past', 'visited', 'chrome'],
+    hasSettings: false,
+    chromeUrl: 'chrome://history'
+  },
+  {
+    id: 'open-downloads',
+    type: 'action',
+    title: 'Open Downloads',
+    description: 'Open Chrome downloads page',
+    icon: '📥',
+    keywords: ['open', 'downloads', 'files', 'chrome'],
+    hasSettings: false,
+    chromeUrl: 'chrome://downloads'
+  },
+  {
+    id: 'open-chrome-settings',
+    type: 'action',
+    title: 'Open Chrome Settings',
+    description: 'Open Chrome settings page',
+    icon: '🔧',
+    keywords: ['open', 'chrome settings', 'preferences', 'chrome'],
+    hasSettings: false,
+    chromeUrl: 'chrome://settings'
+  },
+  {
+    id: 'open-passwords',
+    type: 'action',
+    title: 'Open Passwords',
+    description: 'Open Chrome password manager',
+    icon: '🔑',
+    keywords: ['open', 'passwords', 'password manager', 'keys', 'chrome'],
+    hasSettings: false,
+    chromeUrl: 'chrome://settings/passwords'
   }
 ];
 
@@ -200,6 +260,13 @@ async function executeAction(actionId, openSettings = false) {
   if (openSettings) {
     await chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') });
     return { success: true, message: 'Opened settings' };
+  }
+
+  // Check if it's a chrome:// URL action
+  const action = ACTIONS.find(a => a.id === actionId);
+  if (action?.chromeUrl) {
+    await chrome.tabs.create({ url: action.chromeUrl });
+    return { success: true, message: `Opened ${action.title}` };
   }
 
   switch (actionId) {
