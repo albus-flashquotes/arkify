@@ -3,7 +3,6 @@
 const input = document.querySelector('.fm-input');
 const resultsList = document.querySelector('.fm-results');
 const clearBtn = document.querySelector('.fm-clear-btn');
-const escAction = document.querySelector('.fm-esc-action');
 
 let selectedIndex = 0;
 let currentResults = [];
@@ -24,11 +23,10 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// Update clear button and esc hint
+// Update clear button visibility
 function updateClearButton() {
   const hasText = input.value.length > 0;
   clearBtn.classList.toggle('fm-visible', hasText);
-  escAction.textContent = hasText ? 'clear' : 'clear';
 }
 
 // Clear search

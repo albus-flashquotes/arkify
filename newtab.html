@@ -12,13 +12,17 @@
     }
 
     body {
-      background: #0a0a0a;
+      background: 
+        radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
+        radial-gradient(ellipse at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+        linear-gradient(to bottom, #0a0a0a 0%, #111111 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding-top: 20vh;
+      padding-top: 25vh;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
     }
 
@@ -31,9 +35,21 @@
       display: flex;
       align-items: center;
       padding: 16px 20px;
-      background: #1a1a1a;
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1);
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+        0 0 0 1px rgba(255,255,255,0.08),
+        0 0 80px -20px rgba(99, 102, 241, 0.15);
+      transition: box-shadow 0.3s;
+    }
+
+    .fm-search-wrap:focus-within {
+      box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.5), 
+        0 0 0 1px rgba(255,255,255,0.15),
+        0 0 100px -20px rgba(99, 102, 241, 0.25);
     }
 
     .fm-search-icon {
@@ -93,9 +109,10 @@
 
     .fm-results {
       margin-top: 8px;
-      background: #1a1a1a;
+      background: rgba(26, 26, 26, 0.8);
+      backdrop-filter: blur(20px);
       border-radius: 16px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.08);
       overflow: hidden;
       max-height: 400px;
       overflow-y: auto;
@@ -209,26 +226,6 @@
       font-size: 14px;
     }
 
-    .fm-footer {
-      display: flex;
-      gap: 20px;
-      padding: 16px 20px;
-      font-size: 12px;
-      color: #666;
-      justify-content: center;
-    }
-
-    .fm-footer kbd {
-      display: inline-block;
-      background: rgba(255,255,255,0.1);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: inherit;
-      font-size: 11px;
-      color: #999;
-      margin-right: 4px;
-    }
-
     .fm-toast {
       position: fixed;
       bottom: 24px;
@@ -267,11 +264,6 @@
       </button>
     </div>
     <div class="fm-results"></div>
-    <div class="fm-footer">
-      <span><kbd>↑↓</kbd> navigate</span>
-      <span><kbd>↵</kbd> open</span>
-      <span class="fm-esc-hint"><kbd>esc</kbd> <span class="fm-esc-action">clear</span></span>
-    </div>
   </div>
 
   <script src="newtab.js"></script>
