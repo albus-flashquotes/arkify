@@ -1,5 +1,40 @@
 // FlashMark - Background Service Worker
 
+// Proactively cache favicons from all tabs
+async function cacheFaviconsFromAllTabs() {
+  const tabs = await chrome.tabs.query({});
+  const { faviconCache = {} } = await chrome.storage.local.get(['faviconCache']);
+  
+  let updated = false;
+  for (const tab of tabs) {
+    if (tab.favIconUrl && tab.url && !tab.favIconUrl.startsWith('chrome://')) {
+      const cacheKey = getFaviconCacheKey(tab.url);
+      if (!faviconCache[cacheKey]) {
+        faviconCache[cacheKey] = tab.favIconUrl;
+        updated = true;
+      }
+    }
+  }
+  
+  if (updated) {
+    await chrome.storage.local.set({ faviconCache });
+  }
+}
+
+// Cache on startup
+cacheFaviconsFromAllTabs();
+
+// Cache when tabs update
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.favIconUrl && tab.url) {
+    const cacheKey = getFaviconCacheKey(tab.url);
+    chrome.storage.local.get(['faviconCache'], ({ faviconCache = {} }) => {
+      faviconCache[cacheKey] = changeInfo.favIconUrl;
+      chrome.storage.local.set({ faviconCache });
+    });
+  }
+});
+
 chrome.commands.onCommand.addListener(async (command) => {
   if (command === 'toggle-palette') {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -188,16 +223,13 @@ async function handleSearch(query) {
       const host = getHost(bm.url);
       const cacheKey = getFaviconCacheKey(bm.url);
       const cachedFavicon = newCache[cacheKey];
-      // Use Chrome's internal favicon cache first, then our cache, then Google's service
-      const chromeFavicon = `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(bm.url)}&size=32`;
       const item = {
         type: 'bookmark',
         id: bm.id,
         title: bm.title && bm.title.trim() ? bm.title : host,
         url: bm.url,
         host: host,
-        favIconUrl: chromeFavicon,
-        fallbackFavicon: cachedFavicon || `https://www.google.com/s2/favicons?domain=${host}&sz=32`
+        favIconUrl: cachedFavicon || `https://www.google.com/s2/favicons?domain=${host}&sz=32`
       };
       
       if (urlMatches) {
