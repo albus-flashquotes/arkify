@@ -151,6 +151,21 @@
   font-size: 12px;
 }
 
+.fm-badge-action {
+  background: rgba(168, 85, 247, 0.2);
+  color: #a855f7;
+}
+
+.fm-action-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
 .fm-empty {
   padding: 40px 20px;
   text-align: center;
@@ -176,4 +191,28 @@
   font-size: 11px;
   color: #999;
   margin-right: 4px;
+}
+
+/* Toast notification */
+.fm-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1a1a1a;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
+  z-index: 2147483647;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.fm-toast-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }

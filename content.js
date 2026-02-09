@@ -83,7 +83,7 @@
     }
 
     const response = await chrome.runtime.sendMessage({ action: 'search', query });
-    currentResults = [...response.tabs, ...response.bookmarks];
+    currentResults = [...response.actions, ...response.tabs, ...response.bookmarks];
     selectedIndex = 0;
     renderResults();
   }
@@ -95,20 +95,29 @@
     }
 
     resultsList.innerHTML = currentResults.map((r, i) => {
-      const favicon = r.type === 'tab' && r.favIconUrl 
-        ? r.favIconUrl 
-        : `https://www.google.com/s2/favicons?domain=${r.host}&sz=32`;
-      
-      const badge = r.type === 'tab' 
-        ? '<span class="fm-badge fm-badge-tab">TAB</span>'
-        : '<span class="fm-badge fm-badge-bookmark">★</span>';
+      let favicon, badge, subtitle;
+
+      if (r.type === 'action') {
+        favicon = `<span class="fm-action-icon">${r.icon}</span>`;
+        badge = '<span class="fm-badge fm-badge-action">ACTION</span>';
+        subtitle = r.description;
+      } else {
+        const faviconUrl = r.type === 'tab' && r.favIconUrl 
+          ? r.favIconUrl 
+          : `https://www.google.com/s2/favicons?domain=${r.host}&sz=32`;
+        favicon = `<img class="fm-favicon" src="${faviconUrl}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23666%22><rect width=%2224%22 height=%2224%22 rx=%224%22/></svg>'">`;
+        badge = r.type === 'tab' 
+          ? '<span class="fm-badge fm-badge-tab">TAB</span>'
+          : '<span class="fm-badge fm-badge-bookmark">★</span>';
+        subtitle = r.host;
+      }
 
       return `
         <div class="fm-result ${i === selectedIndex ? 'fm-selected' : ''}" data-index="${i}">
-          <img class="fm-favicon" src="${favicon}" alt="" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%23666%22><rect width=%2224%22 height=%2224%22 rx=%224%22/></svg>'">
+          ${favicon}
           <div class="fm-result-text">
             <div class="fm-title">${escapeHtml(r.title)}</div>
-            <div class="fm-url">${escapeHtml(r.host)}</div>
+            <div class="fm-url">${escapeHtml(subtitle)}</div>
           </div>
           ${badge}
         </div>
@@ -145,8 +154,32 @@
     const result = currentResults[index];
     if (!result) return;
     
-    await chrome.runtime.sendMessage({ action: 'openResult', result });
+    if (result.type === 'action') {
+      const response = await chrome.runtime.sendMessage({ action: 'executeAction', actionId: result.id });
+      if (response.success) {
+        showToast(`✨ Closed ${response.closed} tabs, kept ${response.kept}`);
+      }
+    } else {
+      await chrome.runtime.sendMessage({ action: 'openResult', result });
+    }
     hidePalette();
+  }
+
+  function showToast(message) {
+    const existing = document.getElementById('flashmark-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'flashmark-toast';
+    toast.className = 'fm-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('fm-toast-visible'), 10);
+    setTimeout(() => {
+      toast.classList.remove('fm-toast-visible');
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
   }
 
   function escapeHtml(str) {
