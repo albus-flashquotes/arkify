@@ -134,7 +134,16 @@
 
   function onKeyDown(e) {
     if (e.key === 'Escape') {
-      hidePalette();
+      if (input.value) {
+        // Clear search if there's text
+        input.value = '';
+        resultsList.innerHTML = '';
+        currentResults = [];
+        selectedIndex = 0;
+      } else {
+        // Close palette if search is empty
+        hidePalette();
+      }
       e.preventDefault();
     } else if (e.key === 'ArrowDown') {
       selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
