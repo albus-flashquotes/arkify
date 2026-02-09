@@ -170,39 +170,6 @@ input.addEventListener('input', () => {
 input.addEventListener('keydown', onKeyDown);
 clearBtn.addEventListener('click', clearSearch);
 
-// Auto-focus (override Chrome's address bar focus)
-function forceFocus() {
-  input.focus();
-}
-
-// Aggressive focus - try multiple strategies
-forceFocus();
-
-// Rapid fire on load
-for (let i = 0; i <= 500; i += 10) {
-  setTimeout(forceFocus, i);
-}
-
-// RAF loop for first 500ms
-let startTime = Date.now();
-function rafFocus() {
-  if (Date.now() - startTime < 500) {
-    input.focus();
-    requestAnimationFrame(rafFocus);
-  }
-}
-requestAnimationFrame(rafFocus);
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', forceFocus);
-window.addEventListener('focus', forceFocus);
-window.addEventListener('load', forceFocus);
-
-// Capture any keypress and redirect to input
-document.addEventListener('keydown', (e) => {
-  if (document.activeElement !== input && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    if (e.key.length === 1 || e.key === 'Backspace') {
-      input.focus();
-    }
-  }
-});
+// Focus input when page gets focus (e.g., clicking into the page)
+window.addEventListener('focus', () => input.focus());
+document.addEventListener('click', () => input.focus());
