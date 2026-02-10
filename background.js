@@ -244,7 +244,55 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true;
   }
+  if (request.action === 'navigateOrSearch') {
+    handleNavigateOrSearch(request.query).then(sendResponse);
+    return true;
+  }
 });
+
+// Search engine URL templates
+const SEARCH_ENGINES = {
+  google: 'https://www.google.com/search?q=',
+  duckduckgo: 'https://duckduckgo.com/?q=',
+  bing: 'https://www.bing.com/search?q=',
+  brave: 'https://search.brave.com/search?q=',
+  ecosia: 'https://www.ecosia.org/search?q=',
+  perplexity: 'https://www.perplexity.ai/search?q=',
+  chatgpt: 'https://chatgpt.com/?q=',
+  gemini: 'https://gemini.google.com/app?q=',
+  claude: 'https://claude.ai/new?q='
+};
+
+// Check if string looks like a URL
+function isLikelyUrl(str) {
+  // Has protocol
+  if (/^https?:\/\//i.test(str)) return true;
+  // Looks like domain.tld (with at least one dot and valid TLD pattern)
+  if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z]{2,})+/i.test(str) && !str.includes(' ')) return true;
+  // localhost or IP
+  if (/^(localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?/i.test(str)) return true;
+  return false;
+}
+
+// Handle enter with no results - navigate to URL or search
+async function handleNavigateOrSearch(query) {
+  const q = query.trim();
+  if (!q) return { success: false };
+  
+  let url;
+  if (isLikelyUrl(q)) {
+    // It's a URL - add protocol if missing
+    url = q.startsWith('http') ? q : 'https://' + q;
+  } else {
+    // It's a search query - use configured search engine
+    const { searchEngine = 'google' } = await chrome.storage.sync.get(['searchEngine']);
+    const baseUrl = SEARCH_ENGINES[searchEngine] || SEARCH_ENGINES.google;
+    url = baseUrl + encodeURIComponent(q);
+  }
+  
+  await chrome.tabs.create({ url });
+  return { success: true, url };
+}
 
 // Get tabs sorted by MRU order
 async function getMruTabs() {

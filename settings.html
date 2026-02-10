@@ -1,192 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FlashMark Settings</title>
   <style>
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
-
-    *:focus {
-      outline: none;
-    }
-
+    
     body {
-      background: 
-        radial-gradient(ellipse at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
-        radial-gradient(ellipse at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
-        linear-gradient(to bottom, #0a0a0a 0%, #111111 100%);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 10vh;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
       color: #fff;
+      min-height: 100vh;
+      padding: 40px;
     }
-
-    .settings-container {
-      width: 90%;
-      max-width: 500px;
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
     }
-
+    
     h1 {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: 600;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
-
+    
     .subtitle {
       color: #666;
-      font-size: 14px;
-      margin-bottom: 32px;
+      margin-bottom: 40px;
     }
-
-    .setting-group {
-      background: rgba(26, 26, 26, 0.8);
-      backdrop-filter: blur(20px);
+    
+    .section {
+      background: #1a1a1a;
       border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.08);
+      padding: 24px;
+      margin-bottom: 20px;
     }
-
-    .setting-label {
+    
+    .section-title {
       font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 4px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
     }
-
+    
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+    
+    .setting-label {
+      font-size: 15px;
+    }
+    
     .setting-desc {
-      font-size: 12px;
+      font-size: 13px;
       color: #666;
-      margin-bottom: 12px;
+      margin-top: 4px;
     }
-
-    .setting-input {
-      width: 100%;
-      background: rgba(0,0,0,0.3);
+    
+    select {
+      background: #2a2a2a;
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 8px;
-      padding: 12px;
+      padding: 10px 14px;
       font-size: 14px;
       color: #fff;
-      outline: none;
-      transition: border-color 0.2s;
+      cursor: pointer;
+      min-width: 180px;
     }
-
-    .setting-input:focus {
+    
+    select:focus {
+      outline: none;
       border-color: rgba(99, 102, 241, 0.5);
     }
-
-    .setting-input::placeholder {
-      color: #555;
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-    }
-
-    .btn {
-      flex: 1;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-    }
-
-    .btn-primary {
-      background: rgba(99, 102, 241, 0.8);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: rgba(99, 102, 241, 1);
-    }
-
-    .btn-secondary {
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.15);
-    }
-
+    
     .toast {
       position: fixed;
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
-      background: #1a1a1a;
+      background: #22c55e;
       color: #fff;
       padding: 12px 24px;
-      border-radius: 12px;
+      border-radius: 8px;
       font-size: 14px;
       font-weight: 500;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.1);
       opacity: 0;
       transition: opacity 0.3s, transform 0.3s;
-      pointer-events: none;
     }
-
+    
     .toast.visible {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
-
+    
     .back-link {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       color: #666;
-      font-size: 13px;
       text-decoration: none;
+      font-size: 14px;
       margin-bottom: 24px;
-      transition: color 0.2s;
     }
-
+    
     .back-link:hover {
-      color: #999;
+      color: #fff;
     }
   </style>
 </head>
 <body>
-  <div class="settings-container">
-    <a href="newtab.html" class="back-link">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-      Back
-    </a>
+  <div class="container">
+    <a href="#" class="back-link" id="close-btn">← Close settings</a>
     
-    <h1>Settings</h1>
-    <p class="subtitle">Configure FlashMark actions</p>
-
-    <div class="setting-group">
-      <div class="setting-label">Reset URL</div>
-      <div class="setting-desc">Where "Reset" action opens after closing all tabs</div>
-      <input type="url" class="setting-input" id="reset-url" placeholder="https://google.com">
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-secondary" id="cancel-btn">Cancel</button>
-      <button class="btn btn-primary" id="save-btn">Save Settings</button>
+    <h1>⚡ FlashMark Settings</h1>
+    <p class="subtitle">Configure your command palette experience</p>
+    
+    <div class="section">
+      <div class="section-title">Search</div>
+      
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Default Search Engine</div>
+          <div class="setting-desc">Used when pressing Enter with no matching results</div>
+        </div>
+        <select id="search-engine">
+          <option value="google">Google</option>
+          <option value="duckduckgo">DuckDuckGo</option>
+          <option value="bing">Bing</option>
+          <option value="brave">Brave Search</option>
+          <option value="ecosia">Ecosia</option>
+          <option value="perplexity">Perplexity AI</option>
+          <option value="chatgpt">ChatGPT</option>
+          <option value="gemini">Gemini</option>
+          <option value="claude">Claude</option>
+        </select>
+      </div>
     </div>
   </div>
-
-  <div class="toast" id="toast">Settings saved!</div>
-
-  <script src="settings.js"></script>
+  
+  <div class="toast" id="toast">✓ Saved</div>
+  
+  <script>
+    const searchEngineSelect = document.getElementById('search-engine');
+    const toast = document.getElementById('toast');
+    const closeBtn = document.getElementById('close-btn');
+    
+    // Load current settings
+    chrome.storage.sync.get(['searchEngine'], (result) => {
+      searchEngineSelect.value = result.searchEngine || 'google';
+    });
+    
+    // Save on change
+    searchEngineSelect.addEventListener('change', () => {
+      chrome.storage.sync.set({ searchEngine: searchEngineSelect.value });
+      showToast();
+    });
+    
+    // Close button
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.close();
+    });
+    
+    function showToast() {
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 2000);
+    }
+  </script>
 </body>
 </html>

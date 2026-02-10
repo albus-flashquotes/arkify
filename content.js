@@ -143,7 +143,12 @@
 
   function renderResults() {
     if (currentResults.length === 0) {
-      resultsList.innerHTML = '<div class="fm-empty">No results found</div>';
+      const query = input?.value?.trim();
+      if (query) {
+        resultsList.innerHTML = '<div class="fm-empty">No matches — press Enter to search</div>';
+      } else {
+        resultsList.innerHTML = '';
+      }
       updateFooter();
       return;
     }
@@ -311,18 +316,23 @@
     const result = currentResults[selectedIndex];
     const hasSettings = result?.type === 'action' && result.hasSettings;
     const hasText = input?.value?.length > 0;
+    const hasResults = currentResults.length > 0;
     
     // Contextual action label based on result type
-    let actionLabel = 'open';
+    let actionLabel = 'search';
     if (result?.type === 'tab') {
       actionLabel = 'switch';
     } else if (result?.type === 'action') {
       actionLabel = 'run';
+    } else if (result?.type === 'bookmark') {
+      actionLabel = 'open';
+    } else if (hasText && !hasResults) {
+      actionLabel = 'search';
     }
     
     footer.innerHTML = `
-      <span><kbd>↑↓</kbd> navigate</span>
-      <span><kbd>↵</kbd> ${actionLabel}</span>
+      ${hasResults ? '<span><kbd>↑↓</kbd> navigate</span>' : ''}
+      ${hasText ? `<span><kbd>↵</kbd> ${actionLabel}</span>` : ''}
       ${hasSettings ? '<span><kbd>⇥</kbd> settings</span>' : ''}
       <span><kbd>esc</kbd> ${hasText ? 'clear' : 'close'}</span>
     `;
@@ -330,7 +340,16 @@
 
   async function selectResult(index) {
     const result = currentResults[index];
-    if (!result) return;
+    
+    // No result selected - try to navigate or search
+    if (!result) {
+      const query = input?.value?.trim();
+      if (query) {
+        await chrome.runtime.sendMessage({ action: 'navigateOrSearch', query });
+        hidePalette();
+      }
+      return;
+    }
     
     if (result.type === 'action') {
       const response = await chrome.runtime.sendMessage({ action: 'executeAction', actionId: result.id });
