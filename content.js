@@ -413,9 +413,9 @@
     }
     
     if (result.type === 'action') {
-      // Special handling for reload - show spinner then reload
+      // Reload extension - close palette and reload
       if (result.id === 'reload-extension') {
-        showReloadingState();
+        hidePalette();
         chrome.runtime.sendMessage({ action: 'reload-extension' });
         return;
       }
@@ -440,21 +440,6 @@
     hidePalette();
   }
   
-  function showReloadingState() {
-    const searchWrap = palette.querySelector('.fm-search-wrap');
-    if (searchWrap) searchWrap.style.display = 'none';
-    
-    resultsList.innerHTML = `
-      <div class="fm-reloading">
-        <div class="fm-spinner"></div>
-        <div class="fm-reloading-text">Reloading...</div>
-      </div>
-    `;
-    
-    const footer = palette.querySelector('.fm-footer');
-    if (footer) footer.innerHTML = '';
-  }
-
   function showToast(message) {
     const existing = document.getElementById('flashmark-toast');
     if (existing) existing.remove();

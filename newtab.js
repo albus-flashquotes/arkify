@@ -8,6 +8,14 @@ setInterval(() => {
   }
 }, 500);
 
+// Check if we just reloaded - show toast
+chrome.storage.local.get(['showReloadToast']).then(({ showReloadToast }) => {
+  if (showReloadToast) {
+    chrome.storage.local.remove('showReloadToast');
+    setTimeout(() => showToast('✓ Reloaded'), 100);
+  }
+});
+
 const input = document.querySelector('.fm-input');
 const resultsList = document.querySelector('.fm-results');
 const clearBtn = document.querySelector('.fm-clear-btn');
@@ -301,9 +309,9 @@ async function selectResult(index) {
   if (!result) return;
 
   if (result.type === 'action') {
-    // Special handling for reload - show spinner then reload
+    // Reload extension - close palette, reload, toast on return
     if (result.id === 'reload-extension') {
-      showReloadingState();
+      chrome.storage.local.set({ showReloadToast: true });
       chrome.runtime.sendMessage({ action: 'reload-extension' });
       return;
     }
@@ -326,21 +334,6 @@ async function selectResult(index) {
   } else {
     await chrome.runtime.sendMessage({ action: 'openResult', result });
   }
-}
-
-function showReloadingState() {
-  const searchWrap = document.querySelector('.fm-search-wrap');
-  if (searchWrap) searchWrap.style.display = 'none';
-  
-  resultsList.innerHTML = `
-    <div class="fm-reloading">
-      <div class="fm-spinner"></div>
-      <div class="fm-reloading-text">Reloading...</div>
-    </div>
-  `;
-  
-  const footer = document.querySelector('.fm-footer');
-  if (footer) footer.innerHTML = '';
 }
 
 // Toast notification
