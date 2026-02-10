@@ -307,6 +307,12 @@ async function selectResult(index) {
       return;
     }
     
+    // Settings action opens inline settings
+    if (result.id === 'settings') {
+      openActionSettings('settings');
+      return;
+    }
+    
     const response = await chrome.runtime.sendMessage({ action: 'executeAction', actionId: result.id });
     if (response.success) {
       if (result.id === 'cleanup') {

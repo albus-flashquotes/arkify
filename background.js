@@ -36,42 +36,49 @@ chrome.tabs.onCreated.addListener((tab) => {
 initMruList();
 
 // Check if we need to reopen palette after reload
-chrome.storage.local.get(['reopenAfterReload']).then(async ({ reopenAfterReload }) => {
-  if (reopenAfterReload) {
-    chrome.storage.local.remove('reopenAfterReload');
-    const { tabId, isNewtab, url } = reopenAfterReload;
-    
-    // Small delay to ensure extension is fully loaded
-    await new Promise(r => setTimeout(r, 150));
-    
-    if (isNewtab) {
-      // Newtab page - just reload/navigate to newtab.html
-      try {
+async function checkReopenAfterReload() {
+  const { reopenAfterReload } = await chrome.storage.local.get(['reopenAfterReload']);
+  if (!reopenAfterReload) return;
+  
+  await chrome.storage.local.remove('reopenAfterReload');
+  const { tabId, isNewtab } = reopenAfterReload;
+  
+  // Delay to ensure extension is fully initialized
+  await new Promise(r => setTimeout(r, 200));
+  
+  if (isNewtab) {
+    // Newtab page - navigate to newtab.html (create new if tab gone)
+    try {
+      const tab = await chrome.tabs.get(tabId);
+      if (tab) {
         await chrome.tabs.update(tabId, { url: chrome.runtime.getURL('newtab.html') });
-      } catch {
-        // Tab might not exist, create new one
-        await chrome.tabs.create({ url: chrome.runtime.getURL('newtab.html') });
+      } else {
+        throw new Error('Tab not found');
       }
-    } else {
-      // Content script injection - reinject and show palette
-      try {
-        await chrome.scripting.executeScript({
-          target: { tabId },
-          files: ['content.js']
-        });
-        await chrome.scripting.insertCSS({
-          target: { tabId },
-          files: ['styles.css']
-        });
-        // Give content script time to initialize
-        await new Promise(r => setTimeout(r, 100));
-        await chrome.tabs.sendMessage(tabId, { action: 'show' });
-      } catch (e) {
-        console.log('Could not reinject palette:', e);
-      }
+    } catch {
+      await chrome.tabs.create({ url: chrome.runtime.getURL('newtab.html') });
+    }
+  } else {
+    // Content script - reinject and show palette
+    try {
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['content.js']
+      });
+      await chrome.scripting.insertCSS({
+        target: { tabId },
+        files: ['styles.css']
+      });
+      await new Promise(r => setTimeout(r, 150));
+      await chrome.tabs.sendMessage(tabId, { action: 'show' });
+    } catch (e) {
+      console.log('Could not reinject palette:', e);
     }
   }
-});
+}
+
+// Run on service worker start
+checkReopenAfterReload();
 
 // Proactively cache favicons from all tabs
 async function cacheFaviconsFromAllTabs() {
@@ -292,14 +299,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
   if (request.action === 'reload-extension') {
     // Store tab info to reopen palette after reload
+    const tabId = request.tabId || sender.tab?.id;
     chrome.storage.local.set({ 
       reopenAfterReload: {
-        tabId: request.tabId,
-        isNewtab: request.isNewtab || false,
-        url: request.url
+        tabId: tabId,
+        isNewtab: request.isNewtab || false
       }
     }).then(() => {
-      chrome.runtime.reload();
+      // Small delay to ensure storage write completes
+      setTimeout(() => chrome.runtime.reload(), 50);
     });
     return true;
   }
