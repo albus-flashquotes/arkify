@@ -1,19 +1,19 @@
-/* FlashMark - Command Palette Styles */
+/* Arkify - Command Palette Styles */
 
-#flashmark-palette *:focus,
-#flashmark-palette *:focus-visible,
-#flashmark-palette *:focus-within {
+#arkify-palette *:focus,
+#arkify-palette *:focus-visible,
+#arkify-palette *:focus-within {
   outline: none !important;
   box-shadow: none !important;
 }
 
-#flashmark-palette input:focus,
-#flashmark-palette button:focus {
+#arkify-palette input:focus,
+#arkify-palette button:focus {
   outline: none !important;
   border-color: inherit;
 }
 
-#flashmark-palette {
+#arkify-palette {
   display: none;
   position: fixed;
   top: 0;
@@ -24,7 +24,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
-#flashmark-palette.fm-visible {
+#arkify-palette.fm-visible {
   display: block;
 }
 
@@ -337,11 +337,11 @@
 }
 
 /* Quick Switch Mode - same width as main palette */
-#flashmark-palette.fm-quick-switch .fm-search-wrap {
+#arkify-palette.fm-quick-switch .fm-search-wrap {
   display: none;
 }
 
-#flashmark-palette.fm-quick-switch .fm-results {
+#arkify-palette.fm-quick-switch .fm-results {
   max-height: 400px;
   padding-top: 8px;
 }

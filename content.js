@@ -1,11 +1,11 @@
-// FlashMark - Content Script (Command Palette UI)
+// Arkify - Content Script (Command Palette UI)
 
 (function() {
   // Prevent double injection
-  if (window.__flashmark_loaded) {
+  if (window.__arkify_loaded) {
     return;
   }
-  window.__flashmark_loaded = true;
+  window.__arkify_loaded = true;
 
   let palette = null;
   let input = null;
@@ -20,7 +20,7 @@
     if (palette) return palette;
 
     palette = document.createElement('div');
-    palette.id = 'flashmark-palette';
+    palette.id = 'arkify-palette';
     palette.innerHTML = `
       <div class="fm-backdrop"></div>
       <div class="fm-modal">
@@ -263,7 +263,7 @@
           <span class="fm-settings-back">←</span>
           <div class="fm-settings-title-wrap">
             <span class="fm-settings-title">Settings</span>
-            <span class="fm-settings-desc">Configure FlashMark preferences</span>
+            <span class="fm-settings-desc">Configure Arkify preferences</span>
           </div>
         </div>
         <div class="fm-settings-row">
@@ -441,11 +441,11 @@
   }
   
   function showToast(message) {
-    const existing = document.getElementById('flashmark-toast');
+    const existing = document.getElementById('arkify-toast');
     if (existing) existing.remove();
 
     const toast = document.createElement('div');
-    toast.id = 'flashmark-toast';
+    toast.id = 'arkify-toast';
     toast.className = 'fm-toast';
     toast.textContent = message;
     document.body.appendChild(toast);

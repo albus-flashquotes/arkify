@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "FlashMark",
+  "name": "Arkify",
   "version": "1.0.0",
   "description": "Command palette for tabs and bookmarks",
   "permissions": ["bookmarks", "tabs", "activeTab", "scripting", "favicon", "storage"],
@@ -16,7 +16,7 @@
         "default": "Ctrl+Shift+K",
         "mac": "Command+Shift+K"
       },
-      "description": "Toggle FlashMark palette"
+      "description": "Toggle Arkify palette"
     },
     "quick-switch": {
       "suggested_key": {
