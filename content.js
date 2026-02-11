@@ -15,6 +15,7 @@
   let settingsMode = null;
   let quickSwitchMode = false;
   let ctrlHeld = false;
+  let missingShortcuts = [];
 
   function createPalette() {
     if (palette) return palette;
@@ -96,14 +97,48 @@
     input.focus();
   }
 
-  function showPalette() {
+  async function checkShortcuts() {
+    try {
+      const commands = await chrome.runtime.sendMessage({ type: 'getCommands' });
+      missingShortcuts = [];
+      const palette = commands?.find(c => c.name === 'toggle-palette');
+      const quickSwitch = commands?.find(c => c.name === 'quick-switch');
+      if (!palette?.shortcut) missingShortcuts.push('Command Palette');
+      if (!quickSwitch?.shortcut) missingShortcuts.push('Quick Tab Switch');
+    } catch (e) {
+      missingShortcuts = [];
+    }
+  }
+
+  async function showPalette() {
     createPalette();
     palette.classList.add('fm-visible');
     input.value = '';
     resultsList.innerHTML = '';
     currentResults = [];
     selectedIndex = 0;
+    await checkShortcuts();
+    renderShortcutWarning();
     setTimeout(() => input.focus(), 10);
+  }
+  
+  function renderShortcutWarning() {
+    if (missingShortcuts.length === 0) return;
+    const warning = document.createElement('div');
+    warning.className = 'fm-shortcut-warning';
+    warning.innerHTML = `
+      <div class="fm-warning-icon">⚠️</div>
+      <div class="fm-warning-text">
+        <div class="fm-warning-title">Keyboard shortcuts not configured</div>
+        <div class="fm-warning-desc">${missingShortcuts.join(' & ')} not set — press Enter to configure</div>
+      </div>
+    `;
+    warning.addEventListener('click', openShortcutsPage);
+    resultsList.appendChild(warning);
+  }
+  
+  function openShortcutsPage() {
+    chrome.runtime.sendMessage({ type: 'openShortcuts' });
   }
 
   function hidePalette() {
@@ -215,7 +250,12 @@
       renderResults();
       e.preventDefault();
     } else if (e.key === 'Enter') {
-      selectResult(selectedIndex);
+      // If no results and shortcuts missing, open shortcuts config
+      if (currentResults.length === 0 && missingShortcuts.length > 0 && !input.value.trim()) {
+        openShortcutsPage();
+      } else {
+        selectResult(selectedIndex);
+      }
       e.preventDefault();
     } else if (e.key === 'Tab' && !e.shiftKey) {
       // Tab opens settings for actions that have them

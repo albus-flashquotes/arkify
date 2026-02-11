@@ -334,6 +334,43 @@
   background: #4f46e5;
 }
 
+.fm-shortcut-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+  margin: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.fm-shortcut-warning:hover {
+  background: rgba(251, 191, 36, 0.15);
+}
+
+.fm-warning-icon {
+  font-size: 20px;
+}
+
+.fm-warning-text {
+  flex: 1;
+}
+
+.fm-warning-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fbbf24;
+}
+
+.fm-warning-desc {
+  font-size: 12px;
+  color: #a3a3a3;
+  margin-top: 2px;
+}
+
 .fm-footer {
   display: flex;
   gap: 20px;
